@@ -15,36 +15,62 @@ export default function BookingWidget() {
     if (!section || !widget) return;
 
     const ctx = gsap.context(() => {
-      gsap.fromTo(
-        widget,
-        { opacity: 0, y: 24 },
-        {
-          opacity: 1,
-          y: 0,
+      const mm = gsap.matchMedia();
+
+      // ----------------------------------------------------
+      // 1. DESKTOP VIEW (Min-width: 769px) - Clean Pinned Timeline
+      // ----------------------------------------------------
+      mm.add("(min-width: 769px)", () => {
+        // [CRITICAL FIX]: Scroll hone se pehle hi hidden aur down state set kar di
+        gsap.set(widget, { opacity: 0, y: 24 });
+        gsap.set(widget.querySelectorAll('.field-item'), { opacity: 0, y: 14 });
+
+        // [OPTIMIZATION]: Alag independent triggers ke bajaye merged into a single timeline
+        const desktopTl = gsap.timeline({
           scrollTrigger: {
             trigger: section,
             start: 'top 80%',
-            end: 'top 55%',
-            scrub: 0.5,
-          },
-        }
-      );
-
-      gsap.fromTo(
-        widget.querySelectorAll('.field-item'),
-        { opacity: 0, y: 14 },
-        {
-          opacity: 1,
-          y: 0,
-          stagger: 0.06,
-          scrollTrigger: {
-            trigger: section,
-            start: 'top 75%',
             end: 'top 50%',
             scrub: 0.5,
+            invalidateOnRefresh: true,
           },
-        }
-      );
+        });
+
+        desktopTl.to(widget, { opacity: 1, y: 0, ease: 'power2.out' })
+          .to(widget.querySelectorAll('.field-item'), {
+            opacity: 1,
+            y: 0,
+            stagger: 0.06,
+            ease: 'power2.out'
+          }, "-=0.2");
+      });
+
+      // ----------------------------------------------------
+      // 2. MOBILE VIEW (Max-width: 768px) - Auto Reveal Trigger 📱
+      // ----------------------------------------------------
+      mm.add("(max-width: 768px)", () => {
+        // [CRITICAL FIX]: Mobile elements state backup layout flash prevention
+        gsap.set(widget, { opacity: 0, y: 20 });
+        gsap.set(widget.querySelectorAll('.field-item'), { opacity: 0, y: 10 });
+
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: section,
+            start: 'top 85%',
+            toggleActions: 'play none none reverse',
+          }
+        });
+
+        tl.to(widget, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' })
+          .to(widget.querySelectorAll('.field-item'), {
+            opacity: 1,
+            y: 0,
+            stagger: 0.08,
+            duration: 0.4,
+            ease: 'power2.out'
+          }, "-=0.3");
+      });
+
     }, section);
 
     return () => ctx.revert();
@@ -56,8 +82,10 @@ export default function BookingWidget() {
       ref={sectionRef}
       className="relative w-full py-12 bg-[#F4F1EA] z-20"
     >
+      {/* Widget Container (Added style={{ opacity: 0 }} to lock client flash) */}
       <div
         ref={widgetRef}
+        style={{ opacity: 0 }}
         className="max-w-[980px] mx-auto px-6 py-7 border border-[rgba(17,17,17,0.18)] bg-[#F4F1EA]"
       >
         <h3 className="font-display text-2xl text-[#111111] mb-6 field-item">

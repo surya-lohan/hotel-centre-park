@@ -18,84 +18,81 @@ export default function HeroSection() {
     if (!section || !image || !content || !scrollCue) return;
 
     const ctx = gsap.context(() => {
-      // Set initial states for load animation
-      gsap.set(image, { opacity: 0, scale: 1.06, x: '-6vw' });
-      gsap.set(content.children, { opacity: 0, y: 24 });
-      gsap.set(scrollCue, { opacity: 0, y: 10 });
+      const mm = gsap.matchMedia();
 
-      // Load animation timeline
-      const loadTl = gsap.timeline({ delay: 0.2 });
+      // ----------------------------------------------------
+      // 1. DESKTOP VIEW (Min-width: 769px) - Full Loaded & Pinned Flow
+      // ----------------------------------------------------
+      mm.add("(min-width: 769px)", () => {
+        // Set initial states for desktop
+        gsap.set(image, { opacity: 0, scale: 1.06, x: '-6vw' });
+        gsap.set(content.children, { opacity: 0, y: 24 });
+        gsap.set(scrollCue, { opacity: 0, y: 10 });
 
-      loadTl.to(image, {
-        opacity: 1,
-        scale: 1,
-        x: 0,
-        duration: 0.9,
-        ease: 'power2.out',
-      });
+        // Load animation
+        const loadTl = gsap.timeline({ delay: 0.2 });
+        loadTl.to(image, { opacity: 1, scale: 1, x: 0, duration: 0.9, ease: 'power2.out' });
+        loadTl.to(content.children, { opacity: 1, y: 0, duration: 0.7, stagger: 0.08, ease: 'power2.out' }, '-=0.5');
+        loadTl.to(scrollCue, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }, '-=0.2');
 
-      loadTl.to(
-        content.children,
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.7,
-          stagger: 0.08,
-          ease: 'power2.out',
-        },
-        '-=0.5'
-      );
-
-      loadTl.to(
-        scrollCue,
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.5,
-          ease: 'power2.out',
-        },
-        '-=0.2'
-      );
-
-      // Scroll-driven exit animation (pinned)
-      const shouldPin = typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches;
-      const scrollTl = gsap.timeline({
-        scrollTrigger: {
-          trigger: section,
-          start: 'top top',
-          end: '+=130%',
-          pin: shouldPin,
-          scrub: 0.6,
-          onLeaveBack: () => {
-            // Reset to visible when scrolling back to top
-            gsap.set(image, { opacity: 1, scale: 1, x: 0 });
-            gsap.set(content.children, { opacity: 1, y: 0 });
-            gsap.set(scrollCue, { opacity: 1, y: 0 });
+        // Scroll-driven exit animation
+        const scrollTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: section,
+            start: 'top top',
+            end: '+=60%',
+            pin: true,
+            scrub: 0.6,
+            onLeaveBack: () => {
+              gsap.set(image, { opacity: 1, scale: 1, x: 0 });
+              gsap.set(content.children, { opacity: 1, y: 0 });
+              gsap.set(scrollCue, { opacity: 1, y: 0 });
+            },
           },
-        },
+        });
+
+        scrollTl.fromTo(image, { x: 0, scale: 1, opacity: 1 }, { x: '-10vw', scale: 1.04, opacity: 0, ease: 'power2.in' }, 0.6);
+        scrollTl.fromTo(content.children, { x: 0, opacity: 1 }, { x: '8vw', opacity: 0, ease: 'power2.in', stagger: 0.02 }, 0.6);
+        scrollTl.fromTo(scrollCue, { y: 0, opacity: 1 }, { y: 18, opacity: 0, ease: 'power2.in' }, 0.6);
       });
 
-      // Exit animations (70% - 100%)
-      scrollTl.fromTo(
-        image,
-        { x: 0, scale: 1, opacity: 1 },
-        { x: '-10vw', scale: 1.04, opacity: 0, ease: 'power2.in' },
-        0.7
-      );
+      // ----------------------------------------------------
+      // 2. MOBILE VIEW (Max-width: 768px) - Clean & Glitch-Free 📱
+      // ----------------------------------------------------
+      mm.add("(max-width: 768px)", () => {
+        // Mobile Initial States: X offsets ko kam rakha hai overflow se bachne ke liye
+        gsap.set(image, { opacity: 0, scale: 1.03, x: '-3vw' });
+        gsap.set(content.children, { opacity: 0, y: 15 });
+        gsap.set(scrollCue, { opacity: 0, y: 8 });
 
-      scrollTl.fromTo(
-        content.children,
-        { x: 0, opacity: 1 },
-        { x: '8vw', opacity: 0, ease: 'power2.in', stagger: 0.02 },
-        0.7
-      );
+        // Mobile Load animation
+        const loadTl = gsap.timeline({ delay: 0.2 });
+        loadTl.to(image, { opacity: 1, scale: 1, x: 0, duration: 0.8, ease: 'power2.out' });
+        loadTl.to(content.children, { opacity: 1, y: 0, duration: 0.6, stagger: 0.06, ease: 'power2.out' }, '-=0.4');
+        loadTl.to(scrollCue, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' }, '-=0.2');
 
-      scrollTl.fromTo(
-        scrollCue,
-        { y: 0, opacity: 1 },
-        { y: 18, opacity: 0, ease: 'power2.in' },
-        0.7
-      );
+        // Mobile Scroll-driven exit animation
+        const scrollTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: section,
+            start: 'top top',
+            end: '+=40%',     // Mobile par exit animation thodi jaldi khatam hogi
+            pin: false,       // Mobile pinning turned off (no address bar jumpers)
+            scrub: 1,         // Smooth touch tracking
+            onLeaveBack: () => {
+              gsap.set(image, { opacity: 1, scale: 1, x: 0 });
+              gsap.set(content.children, { opacity: 1, y: 0 });
+              gsap.set(scrollCue, { opacity: 1, y: 0 });
+            },
+          },
+        });
+
+        // Mobile Exit: Subtly pushing elements out
+        scrollTl.fromTo(image, { x: 0, opacity: 1 }, { x: '-5vw', opacity: 0, ease: 'power2.in' }, 0.6);
+        scrollTl.fromTo(content.children, { x: 0, opacity: 1 }, { x: '4vw', opacity: 0, ease: 'power2.in', stagger: 0.01 }, 0.6);
+        scrollTl.fromTo(scrollCue, { y: 0, opacity: 1 }, { y: 10, opacity: 0, ease: 'power2.in' }, 0.6);
+      });
+
     }, section);
 
     return () => ctx.revert();
@@ -128,7 +125,7 @@ export default function HeroSection() {
             Hotel Centre Park
           </span>
 
-          <h1 className="font-display text-[clamp(44px,5vw,72px)] leading-[0.95] tracking-[-0.02em] text-[#111111]">
+          <h1 className="font-display text-[clamp(44px,5vw,72px)] leading-[1.02] tracking-[-0.02em] text-[#111111] pb-1">
             A quiet stay
             <br />
             in the heart

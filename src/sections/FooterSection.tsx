@@ -3,8 +3,6 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Phone, Mail } from 'lucide-react';
 
-gsap.registerPlugin(ScrollTrigger);
-
 export default function FooterSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -15,21 +13,45 @@ export default function FooterSection() {
     if (!section || !content) return;
 
     const ctx = gsap.context(() => {
-      gsap.fromTo(
-        content.children,
-        { opacity: 0, y: 18 },
-        {
-          opacity: 1,
-          y: 0,
-          stagger: 0.06,
-          scrollTrigger: {
-            trigger: section,
-            start: 'top 80%',
-            end: 'top 55%',
-            scrub: 0.5,
-          },
-        }
-      );
+      const mm = gsap.matchMedia();
+
+      // 1. DESKTOP VIEW: Scrub ke saath original makkhan flow
+      mm.add("(min-width: 769px)", () => {
+        gsap.fromTo(
+          content.children,
+          { opacity: 0, y: 18 },
+          {
+            opacity: 1,
+            y: 0,
+            stagger: 0.06,
+            scrollTrigger: {
+              trigger: section,
+              start: 'top 80%',
+              end: 'top 55%',
+              scrub: 0.5,
+            },
+          }
+        );
+      });
+
+      // 2. MOBILE VIEW: Fast & smooth auto-reveal 📱
+      mm.add("(max-width: 768px)", () => {
+        gsap.fromTo(
+          content.children,
+          { opacity: 0, y: 12 }, // Vertical movement thoda kam kiya mobile ke liye
+          {
+            opacity: 1,
+            y: 0,
+            stagger: 0.05, // Stagger halka sa fast kiya
+            scrollTrigger: {
+              trigger: section,
+              start: 'top 85%', // Mobile screen par thoda jaldi trigger hoga
+              toggleActions: 'play none none reverse', // Scroll par play, ulta scroll par reverse
+            },
+          }
+        );
+      });
+
     }, section);
 
     return () => ctx.revert();

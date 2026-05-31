@@ -33,7 +33,7 @@ function App() {
     lenisRef.current = lenis;
 
     // Connect Lenis to GSAP ScrollTrigger
-    lenis.on('scroll', ScrollTrigger.update);
+    lenis.on('scroll', () => ScrollTrigger.update());
 
     const onTick = (time: number) => {
       lenis.raf(time * 1000);
@@ -42,6 +42,16 @@ function App() {
     gsap.ticker.add(onTick);
 
     gsap.ticker.lagSmoothing(0);
+
+    let resizeTimer: ReturnType<typeof setTimeout>;
+    const onResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        ScrollTrigger.refresh();
+      }, 200);
+    };
+
+    window.addEventListener('resize', onResize);
 
     // Global snap configuration for pinned sections
     const setupGlobalSnap = () => {
@@ -85,10 +95,13 @@ function App() {
     };
 
     // Delay snap setup to ensure all ScrollTriggers are created
-    const snapTimeout = setTimeout(setupGlobalSnap, 500);
+    ScrollTrigger.addEventListener('refresh', setupGlobalSnap);
+    ScrollTrigger.refresh();
+    setupGlobalSnap();
 
     return () => {
-      clearTimeout(snapTimeout);
+      window.removeEventListener('resize', onResize);
+      clearTimeout(resizeTimer);
       lenis.destroy();
       ScrollTrigger.getAll().forEach((st) => st.kill());
       gsap.ticker.remove(onTick);
