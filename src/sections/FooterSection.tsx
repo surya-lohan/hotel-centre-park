@@ -1,6 +1,5 @@
 import { useRef, useLayoutEffect } from 'react';
 import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Phone, Mail } from 'lucide-react';
 
 export default function FooterSection() {

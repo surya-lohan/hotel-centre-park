@@ -81,7 +81,7 @@ export default function DiningSection() {
         // Mobile Exit
         scrollTl.to(leftImageRef.current, { x: '-12vw', opacity: 0, ease: 'power2.in' }, 0.7);
         scrollTl.to(rightPanelRef.current, { x: '8vw', opacity: 0, ease: 'power2.in' }, 0.7);
-        scrollTl.to(textOverlayRef.current?.children || [], { y: 0, opacity: 1 }, { y: -10, opacity: 0, stagger: 0.01, ease: 'power2.in' }, 0.7);
+        scrollTl.to(textOverlayRef.current?.children || [], { y: -10, opacity: 0, stagger: 0.01, ease: 'power2.in' }, 0.7);
         scrollTl.to(menuCardRef.current, { y: '-6vh', opacity: 0, ease: 'power2.in' }, 0.7);
       });
 
